@@ -3,13 +3,23 @@ package co.com.passrecovery;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.design.widget.TextInputEditText;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.Toast;
+
+import es.dmoral.toasty.Toasty;
 
 public class MainActivity extends AppCompatActivity {
+    private Button btnGuardar;
+    private EditText txtNombreSistema;
+    private EditText txtPass;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -18,14 +28,34 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        btnGuardar = (Button) findViewById(R.id.btn_guardar);
+        txtNombreSistema = (EditText) findViewById(R.id.app_input_name);
+        txtPass = (EditText) findViewById(R.id.input_password);
+
+        btnGuardar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (!validarForm()) {
+                    Toasty.error(view.getContext(), "El formulario no está completo!", Toast.LENGTH_SHORT, true).show();
+                } else {
+                    Toasty.success(view.getContext(), "La contraseña ha sido almacenada!", Toast.LENGTH_SHORT, true).show();
+                    txtNombreSistema.setText("");
+                    txtPass.setText("");
+                }
+
+                //Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
+                  //      .setAction("Action", null).show();
+            }
+        });
+
+        /*FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
             }
-        });
+        });*/
     }
 
     @Override
@@ -43,10 +73,25 @@ public class MainActivity extends AppCompatActivity {
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
+        /*if (id == R.id.action_settings) {
             return true;
-        }
+        }*/
 
         return super.onOptionsItemSelected(item);
+    }
+
+    private boolean validarForm(){
+        boolean retorno = true;
+
+        try {
+            if (txtNombreSistema.getText().toString().matches("")) {
+                retorno = false;
+            } else if (txtPass.getText().toString().matches("")) {
+                retorno = false;
+            }
+        } catch (Exception e) {
+            Log.d("MainActivity", "Error validando formulario: " + e.getMessage());
+        }
+        return retorno;
     }
 }

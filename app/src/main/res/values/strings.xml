@@ -1,4 +1,7 @@
 <resources>
     <string name="app_name">Pass Recovery</string>
     <string name="action_settings">Settings</string>
+    <string name="password">Contraseña</string>
+    <string name="nombre_sistema">Sistema/Aplicación</string>
+    <string name="btn_guardar">Guardar</string>
 </resources>
