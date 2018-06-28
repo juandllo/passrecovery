@@ -4,4 +4,6 @@
     <string name="password">Contraseña</string>
     <string name="nombre_sistema">Sistema/Aplicación</string>
     <string name="btn_guardar">Guardar</string>
+    <string name="title_activity_crear_clave">Claves</string>
+    <string name="nombre_usuario">Nombre Usuario</string>
 </resources>
