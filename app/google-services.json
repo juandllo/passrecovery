@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "655629681144",
+    "firebase_url": "https://passrecovery-5a172.firebaseio.com",
+    "project_id": "passrecovery-5a172",
+    "storage_bucket": "passrecovery-5a172.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:655629681144:android:c2c3558b5e502aa1",
+        "android_client_info": {
+          "package_name": "co.com.passrecovery"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "655629681144-1lbm3mq5r6jjpmjahqg4pr997c0qpguo.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "co.com.passrecovery",
+            "certificate_hash": "ed2268111f853f1dec6fd8b6f11a1ee88584e03c"
+          }
+        },
+        {
+          "client_id": "655629681144-cbpe20vuhu7b1hdjd238r6v94168ejue.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBq25adiD_VC1J0vjN9e1DVVWUdCWDC2hk"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "655629681144-cbpe20vuhu7b1hdjd238r6v94168ejue.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

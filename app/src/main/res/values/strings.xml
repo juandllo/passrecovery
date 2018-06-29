@@ -6,4 +6,8 @@
     <string name="btn_guardar">Guardar</string>
     <string name="title_activity_crear_clave">Claves</string>
     <string name="nombre_usuario">Nombre Usuario</string>
+    <string name="title_activity_login">Iniciar Sesion</string>
+
+    <!-- Strings related to login -->
+    <string name="no_login">No se ha podido iniciar sesión!</string>
 </resources>
