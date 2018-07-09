@@ -4,10 +4,11 @@ import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.drawable.Drawable;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.graphics.drawable.RoundedBitmapDrawable;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
@@ -17,6 +18,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.WindowManager;
 import android.widget.CompoundButton;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -46,6 +48,8 @@ import co.com.passrecovery.adapters.ClavesAdapter;
 import co.com.passrecovery.adapters.RecyclerTouchListener;
 import co.com.passrecovery.db.claves.ClavesOperations;
 import co.com.passrecovery.model.Claves;
+import co.com.passrecovery.util.ImageCircleTransformation;
+import co.com.passrecovery.util.MisPreferencias;
 import es.dmoral.toasty.Toasty;
 
 public class MainActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener{
@@ -68,6 +72,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        getSupportActionBar().hide();
 
         lblNombreUsuario = (TextView) findViewById(R.id.lbl_nombre_usuario);
         lblCorreoUsuario = (TextView) findViewById(R.id.lbl_correo_usuario);
@@ -84,58 +89,48 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         reciclerView.setItemAnimator(new DefaultItemAnimator());
         reciclerView.addOnItemTouchListener(new RecyclerTouchListener(getApplicationContext(), reciclerView, new RecyclerTouchListener.ClickListener() {
             @Override
-            public void onClick(View view, int position) {
-                LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-                View customView = inflater.inflate(R.layout.dialog_detalle_clave, null);
+            public void onClick(final View view, final int position) {
+
+                LayoutInflater inflaterVerification = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                View customViewVerification = inflaterVerification.inflate(R.layout.dialog_clave_ver, null);
+
+                MisPreferencias prefs = MisPreferencias.getInstance(getApplicationContext());
+                prefs.saveData("Pin", "7618");
+                final String pin = prefs.getData("Pin");
 
                 try {
-                    final Claves clave = claves.get(position);
-                    TextView usuarioData = (TextView) customView.findViewById(R.id.dialog_data_nombre_usuario);
-                    final TextView contraseniaData = (TextView) customView.findViewById(R.id.dialog_data_contrasenia);
-                    Switch verPass = (Switch) customView.findViewById(R.id.sw_ver_pass);
-                    final ImageButton imgClipboard = (ImageButton) customView.findViewById(R.id.img_clipboard);
-
-                    verPass.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-                        @Override
-                        public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                            if (isChecked) {
-                                contraseniaData.setText(clave.getPass());
-                            } else {
-                                contraseniaData.setText("**********");
-                            }
-                        }
-                    });
-
-                    imgClipboard.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            ClipData clip = ClipData.newPlainText("text", clave.getPass().toString());
-                            ClipboardManager clipboard = (ClipboardManager)getApplicationContext().getSystemService(CLIPBOARD_SERVICE);
-                            clipboard.setPrimaryClip(clip);
-                            imgClipboard.setImageDrawable(getResources().getDrawable(R.drawable.ic_clipboard_done));
-                            Toasty.info(getApplicationContext(), "Contraseña copiada al portapapeles!", Toast.LENGTH_SHORT, true).show();
-                        }
-                    });
-
-                    usuarioData.setText(clave.getNombreUsuario());
-                    contraseniaData.setText("**********");
+                    final TextView txtVerification = (TextView) customViewVerification.findViewById(R.id.verification_input);
+                    txtVerification.requestFocus();
+                    getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
 
                     new MaterialStyledDialog.Builder(view.getContext())
-                            .setTitle(clave.getNombreServicio())
-                            .withIconAnimation(false)
-                            .withDialogAnimation(true)
-                            .setCustomView(customView)
-                            .setStyle(Style.HEADER_WITH_ICON)
-                            .setIcon(R.drawable.ic_action_dialog_pass)
-                            .setPositiveText("Aceptar")
-                            .autoDismiss(false)
-                            .onPositive(new MaterialDialog.SingleButtonCallback() {
-                                @Override
-                                public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                        .setTitle("Pin de verificacion")
+                        .withIconAnimation(false)
+                        .withDialogAnimation(true)
+                        .setCustomView(customViewVerification)
+                        .setStyle(Style.HEADER_WITH_ICON)
+                        .setIcon(R.drawable.ic_action_dialog_pass)
+                        .setNegativeText("Cancelar")
+                        .setPositiveText("Aceptar")
+                        .autoDismiss(false)
+                        .onPositive(new MaterialDialog.SingleButtonCallback() {
+                            @Override
+                            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                                if (txtVerification.getText().toString().matches(pin)) {
                                     dialog.dismiss();
+                                    ejecutarDialogClave(view, position);
+                                } else {
+                                    Toasty.error(getApplicationContext(), "Pin de verificacion incorrectos!", Toast.LENGTH_SHORT, true).show();
                                 }
-                            })
-                            .show();
+                            }
+                        })
+                        .onNegative(new MaterialDialog.SingleButtonCallback() {
+                            @Override
+                            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                                dialog.dismiss();
+                            }
+                        })
+                        .show();
                 } catch(Exception e) {
                     e.getMessage();
                 }
@@ -192,6 +187,63 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                 .enableAutoManage(this, this)
                 .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
                 .build();
+    }
+
+    private void ejecutarDialogClave(View view, int position) {
+        LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        View customView = inflater.inflate(R.layout.dialog_detalle_clave, null);
+
+        try {
+            final Claves clave = claves.get(position);
+            TextView usuarioData = (TextView) customView.findViewById(R.id.dialog_data_nombre_usuario);
+            final TextView contraseniaData = (TextView) customView.findViewById(R.id.dialog_data_contrasenia);
+            Switch verPass = (Switch) customView.findViewById(R.id.sw_ver_pass);
+            final ImageButton imgClipboard = (ImageButton) customView.findViewById(R.id.img_clipboard);
+
+            verPass.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                @Override
+                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                    if (isChecked) {
+                        contraseniaData.setText(clave.getPass());
+                    } else {
+                        contraseniaData.setText("**********");
+                    }
+                }
+            });
+
+            imgClipboard.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    ClipData clip = ClipData.newPlainText("text", clave.getPass().toString());
+                    ClipboardManager clipboard = (ClipboardManager)getApplicationContext().getSystemService(CLIPBOARD_SERVICE);
+                    clipboard.setPrimaryClip(clip);
+                    imgClipboard.setImageDrawable(getResources().getDrawable(R.drawable.ic_clipboard_done));
+                    Toasty.info(getApplicationContext(), "Contraseña copiada al portapapeles!", Toast.LENGTH_SHORT, true).show();
+                }
+            });
+
+            usuarioData.setText(clave.getNombreUsuario());
+            contraseniaData.setText("**********");
+
+            new MaterialStyledDialog.Builder(view.getContext())
+                    .setTitle(clave.getNombreServicio())
+                    .withIconAnimation(false)
+                    .withDialogAnimation(true)
+                    .setCustomView(customView)
+                    .setStyle(Style.HEADER_WITH_ICON)
+                    .setIcon(R.drawable.ic_action_dialog_pass)
+                    .setPositiveText("Aceptar")
+                    .autoDismiss(false)
+                    .onPositive(new MaterialDialog.SingleButtonCallback() {
+                        @Override
+                        public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                            dialog.dismiss();
+                        }
+                    })
+                    .show();
+        } catch (Exception e){
+
+        }
     }
 
     @Override
@@ -251,6 +303,11 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                 lblCorreoUsuario.setText(account.getEmail());
                 if (account.getPhotoUrl() != null) {
                     Picasso.with(getApplicationContext()).load(account.getPhotoUrl())
+                        .transform(new ImageCircleTransformation())
+                        .into(imgUsuario);
+                } else {
+                    Picasso.with(getApplicationContext()).load(R.drawable.ic_account_logo)
+                            .transform(new ImageCircleTransformation())
                             .into(imgUsuario);
                 }
             } else {
